@@ -1,32 +1,16 @@
-/// Interface representing `HelloContract`.
-/// This interface allows modification and retrieval of the contract balance.
-#[starknet::interface]
-pub trait IHelloStarknet<TContractState> {
-    /// Increase contract balance.
-    fn increase_balance(ref self: TContractState, amount: felt252);
-    /// Retrieve contract balance.
-    fn get_balance(self: @TContractState) -> felt252;
-}
+mod parser;
+mod traits;
 
-/// Simple contract for managing balance.
-#[starknet::contract]
-mod HelloStarknet {
-    use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
+pub use parser::json_parser;
+pub use traits::JsonDeserialize;
+use core::byte_array::ByteArray;
+use core::result::{Result};
+use core::traits::Drop;
 
-    #[storage]
-    struct Storage {
-        balance: felt252,
-    }
-
-    #[abi(embed_v0)]
-    impl HelloStarknetImpl of super::IHelloStarknet<ContractState> {
-        fn increase_balance(ref self: ContractState, amount: felt252) {
-            assert(amount != 0, 'Amount cannot be 0');
-            self.balance.write(self.balance.read() + amount);
-        }
-
-        fn get_balance(self: @ContractState) -> felt252 {
-            self.balance.read()
-        }
-    }
+pub fn deserialize_from_byte_array<T, impl TDeserialize: JsonDeserialize<T>, impl TDrop: Drop<T>>(
+    json_data: ByteArray
+) -> Result<T, ByteArray> {
+    let mut pos = 0;
+    json_parser::skip_whitespace(@json_data, ref pos);
+    json_parser::parse_object::<T, TDeserialize, TDrop>(@json_data, ref pos)
 }
