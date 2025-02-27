@@ -1,49 +1,17 @@
-[package]
-name = "serde_json"
+[workspace]
+members = ["packages/serde_json", "packages/serde_json_macro"]
+name = "strapex_serde_json"
 version = "0.1.0"
-edition = "2024_07"
+description = "Strapex Serde Json Package"
+homepage = "https://github.com/StrapexLabs/serde_json"
+cairo-version = "2.10.0"
 
-# See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest.html
+[workspace.dependencies]
+starknet = "2.10.0"
+cairo_test = "2.10.0"
 
-[dependencies]
-starknet = "2.10.1"
-serde_json_macro = { path = "packages/serde_json_macro" }
-
-[dev-dependencies]
-snforge_std = "0.37.0"
-
-[[target.starknet-contract]]
-sierra = true
+[workspace.tool.fmt]
+sort-module-level-items = true
 
 [scripts]
-test = "snforge test"
-
-# Visit https://foundry-rs.github.io/starknet-foundry/appendix/scarb-toml.html for more information
-
-# [tool.snforge]                                             # Define `snforge` tool section
-# exit_first = true                                          # Stop tests execution immediately upon the first failure
-# fuzzer_runs = 1234                                         # Number of runs of the random fuzzer
-# fuzzer_seed = 1111                                         # Seed for the random fuzzer
-
-# [[tool.snforge.fork]]                                      # Used for fork testing
-# name = "SOME_NAME"                                         # Fork name
-# url = "http://your.rpc.url"                                # Url of the RPC provider
-# block_id.tag = "latest"                                    # Block to fork from (block tag)
-
-# [[tool.snforge.fork]]
-# name = "SOME_SECOND_NAME"
-# url = "http://your.second.rpc.url"                         
-# block_id.number = "123"                                    # Block to fork from (block number)
-
-# [[tool.snforge.fork]]
-# name = "SOME_THIRD_NAME"
-# url = "http://your.third.rpc.url"
-# block_id.hash = "0x123"                                    # Block to fork from (block hash)
-
-# [profile.dev.cairo]                                        # Configure Cairo compiler
-# unstable-add-statements-code-locations-debug-info = true   # Should be used if you want to use coverage
-# unstable-add-statements-functions-debug-info = true        # Should be used if you want to use coverage/profiler
-# inlining-strategy = "avoid"                                # Should be used if you want to use coverage
-
-# [features]                                                 # Used for conditional compilation
-# enable_for_tests = []                                      # Feature name and list of other features that should be enabled with it
+all = "scarb build && scarb test"

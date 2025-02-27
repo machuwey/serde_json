@@ -1,5 +1,5 @@
-mod parser;
-mod traits;
+pub mod parser;
+pub mod traits;
 
 pub use parser::json_parser;
 pub use traits::JsonDeserialize;
@@ -8,7 +8,7 @@ use core::result::{Result};
 use core::traits::Drop;
 
 pub fn deserialize_from_byte_array<T, impl TDeserialize: JsonDeserialize<T>, impl TDrop: Drop<T>>(
-    json_data: ByteArray
+    json_data: ByteArray,
 ) -> Result<T, ByteArray> {
     let mut pos = 0;
     json_parser::skip_whitespace(@json_data, ref pos);
