@@ -45,6 +45,10 @@ pub fn serde_json(token_stream: TokenStream) -> ProcMacroResult {
             "parse_u64"
         } else if member_type == "ByteArray" {
             "parse_string"
+        } else if member_type == "bool" {
+            "parse_bool"
+        } else if member_type.starts_with("Array<") && member_type.ends_with(">") {
+            "parse_array"
         } else {
             "parse_object"
         };
