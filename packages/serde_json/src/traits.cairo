@@ -31,3 +31,10 @@ impl ArrayJsonDeserialize<T, impl TDeserialize: JsonDeserialize<T>, impl TDrop: 
         json_parser::parse_array::<T, TDeserialize, TDrop>(data, ref pos)
     }
 }
+
+// Implement JsonDeserialize for felt252
+impl Felt252JsonDeserialize of JsonDeserialize<felt252> {
+    fn deserialize(data: @ByteArray, ref pos: usize) -> Result<felt252, ByteArray> {
+        json_parser::parse_felt252(data, ref pos)
+    }
+}

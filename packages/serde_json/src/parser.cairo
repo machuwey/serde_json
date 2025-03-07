@@ -88,6 +88,22 @@ pub mod json_parser {
         Result::Ok(num)
     }
 
+    pub fn parse_felt252(data: @ByteArray, ref pos: usize) -> Result<felt252, ByteArray> {
+        skip_whitespace(data, ref pos);
+        let mut num: felt252 = 0;
+        let mut has_digits = false;
+        while pos < data.len() && (data[pos] >= 48_u8 && data[pos] <= 57_u8) { // '0' to '9'
+            num = num * 10 + (data[pos] - 48_u8).into();
+            pos += 1;
+            has_digits = true;
+        };
+        if !has_digits {
+            let error: ByteArray = "Expected number";
+            return Result::Err(error);
+        };
+        Result::Ok(num)
+    }
+
     pub fn parse_object<T, impl TDeserialize: super::JsonDeserialize<T>, impl TDrop: Drop<T>>(
         data: @ByteArray, ref pos: usize
     ) -> Result<T, ByteArray> {
