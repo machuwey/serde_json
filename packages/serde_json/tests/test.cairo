@@ -5,6 +5,13 @@ use core::array::{Array, ArrayTrait};
 use serde_json::JsonDeserialize;
 
 #[derive(Drop, Default, SerdeJson)]
+struct Event {
+    id: felt252,
+    name: ByteArray,
+    active: bool
+}
+
+#[derive(Drop, Default, SerdeJson)]
 struct User {
     name: ByteArray,
     age: u64,
@@ -21,7 +28,7 @@ struct Post {
 
 #[cfg(test)]
 mod tests {
-    use super::{Post, User, deserialize_from_byte_array};
+    use super::{Post, User, Event, deserialize_from_byte_array};
     use core::byte_array::ByteArray;
     use core::panic_with_felt252;
 
@@ -135,6 +142,43 @@ mod tests {
         match result {
             Result::Ok(_) => panic(array!['Expected failure']),
             Result::Err(e) => assert(e == "Failed to parse comments", 'Wrong error'),
+        }
+    }
+
+    #[test]
+    fn test_event_with_felt252() {
+        let json: ByteArray = "{\"id\":123456,\"name\":\"launch\",\"active\":true}";
+        let result = deserialize_from_byte_array::<Event>(json);
+        match result {
+            Result::Ok(event) => {
+                assert(event.id == 123456, 'id should be 123456');
+                assert(event.name == "launch", 'name should be launch');
+                assert(event.active, 'active should be true');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Deserialization failed');
+            },
+        }
+    }
+
+    #[test]
+    fn test_invalid_felt252() {
+        let json: ByteArray = "{\"id\":\"not_a_number\",\"name\":\"launch\",\"active\":true}";
+        let result = deserialize_from_byte_array::<Event>(json);
+        match result {
+            Result::Ok(_) => panic(array!['Expected failure']),
+            Result::Err(e) => assert(e == "Failed to parse id", 'Wrong error'),
+        }
+    }
+
+    #[test]
+    fn test_missing_felt252() {
+        let json: ByteArray = "{\"name\":\"launch\",\"active\":true}";
+        let result = deserialize_from_byte_array::<Event>(json);
+        match result {
+            Result::Ok(_) => panic(array!['Expected failure']),
+            Result::Err(e) => assert(e == "Missing required field", 'Wrong error'),
         }
     }
 }

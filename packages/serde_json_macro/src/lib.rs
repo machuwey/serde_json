@@ -47,6 +47,8 @@ pub fn serde_json(token_stream: TokenStream) -> ProcMacroResult {
             "parse_string"
         } else if member_type == "bool" {
             "parse_bool"
+        } else if member_type == "felt252" {
+            "parse_felt252"
         } else if member_type.starts_with("Array<") && member_type.ends_with(">") {
             "parse_array"
         } else {
