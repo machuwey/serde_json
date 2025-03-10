@@ -1,7 +1,7 @@
 use serde_json::json_parser;
 use serde_json::deserialize_from_byte_array;
 use core::byte_array::{ByteArray, ByteArrayTrait};
-use core::array::{Array, ArrayTrait};
+use core::array::{Array};
 use serde_json::JsonDeserialize;
 
 #[derive(Drop, Default, SerdeJson)]
@@ -26,9 +26,15 @@ struct Post {
     timestamp: u64,
 }
 
+#[derive(Drop, SerdeJson, Default)]
+struct TestBigNumber {
+    test_value: u128,
+    description: ByteArray
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Post, User, Event, deserialize_from_byte_array};
+    use super::{Post, User, Event, TestBigNumber, deserialize_from_byte_array};
     use core::byte_array::ByteArray;
     use core::panic_with_felt252;
 
@@ -179,6 +185,70 @@ mod tests {
         match result {
             Result::Ok(_) => panic(array!['Expected failure']),
             Result::Err(e) => assert(e == "Missing required field", 'Wrong error'),
+        }
+    }
+
+    #[test]
+    fn test_quoted_numbers() {
+        // Test with quoted u64
+        let json: ByteArray = "{\"name\":\"alice\",\"age\":\"25\",\"verified\":true}";
+        let result = deserialize_from_byte_array::<User>(json);
+        match result {
+            Result::Ok(user) => {
+                assert(user.name == "alice", 'name should be alice');
+                assert(user.age == 25, 'age should be 25');
+                assert(user.verified, 'verified should be true');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Deserialization failed');
+            },
+        }
+
+        // Test with quoted felt252
+        let json: ByteArray = "{\"id\":\"123456\",\"name\":\"launch\",\"active\":true}";
+        let result = deserialize_from_byte_array::<Event>(json);
+        match result {
+            Result::Ok(event) => {
+                assert(event.id == 123456, 'id should be 123456');
+                assert(event.name == "launch", 'name should be launch');
+                assert(event.active, 'active should be true');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Deserialization failed');
+            },
+        }
+    }
+
+    #[test]
+    fn test_u128_parsing() {
+        // Test with unquoted u128
+        let json: ByteArray = "{\"test_value\":340282366920938463463374607431768211455,\"description\":\"max u128\"}";
+        let result = deserialize_from_byte_array::<TestBigNumber>(json);
+        match result {
+            Result::Ok(big_num) => {
+                assert(big_num.test_value == 340282366920938463463374607431768211455_u128, 'value should be max u128');
+                assert(big_num.description == "max u128", 'description should match');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Deserialization failed');
+            },
+        }
+        
+        // Test with quoted u128
+        let json: ByteArray = "{\"test_value\":\"9223372036854775808\",\"description\":\"2^63\"}";
+        let result = deserialize_from_byte_array::<TestBigNumber>(json);
+        match result {
+            Result::Ok(big_num) => {
+                assert(big_num.test_value == 9223372036854775808_u128, 'value should be 2^63');
+                assert(big_num.description == "2^63", 'description should match');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Deserialization failed');
+            },
         }
     }
 }
