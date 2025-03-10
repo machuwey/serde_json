@@ -4,11 +4,11 @@ name = "strapex_serde_json"
 version = "0.1.0"
 description = "Strapex Serde Json Package"
 homepage = "https://github.com/StrapexLabs/serde_json"
-cairo-version = "2.10.1"
+cairo-version = "2.8.2"
 
 [workspace.dependencies]
-starknet = "2.10.1"
-cairo_test = "2.10.1"
+starknet = "2.8.2"
+cairo_test = "2.8.2"
 
 [workspace.tool.fmt]
 sort-module-level-items = true
