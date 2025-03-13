@@ -10,7 +10,14 @@ pub mod json_parser {
         let space = 32_u8;
         let newline = 10_u8;
         let tab = 9_u8;
-        while pos < data.len() && (data[pos] == space || data[pos] == newline || data[pos] == tab) {
+        let carriage_return = 13_u8;  // '\r'
+        
+        while pos < data.len() && (
+            data[pos] == space || 
+            data[pos] == newline || 
+            data[pos] == tab || 
+            data[pos] == carriage_return
+        ) {
             pos += 1;
         }
     }
@@ -139,6 +146,7 @@ pub mod json_parser {
     pub fn parse_object<T, impl TDeserialize: super::JsonDeserialize<T>, impl TDrop: Drop<T>>(
         data: @ByteArray, ref pos: usize
     ) -> Result<T, ByteArray> {
+        skip_whitespace(data, ref pos);
         if pos >= data.len() || data[pos] != 123_u8 { // '{'
             return Result::Err("Expected object");
         }
@@ -179,6 +187,7 @@ pub mod json_parser {
         let mut error: ByteArray = "";
         
         loop {
+            skip_whitespace(data, ref pos);
             match TDeserialize::deserialize(data, ref pos) {
                 Result::Ok(value) => {
                     result.append(value);
@@ -200,31 +209,31 @@ pub mod json_parser {
             if next_char == 93_u8 { // ']'
                 pos += 1;
                 break;
-            }
-            if next_char != 44_u8 { // ','
-                error = "Expected comma or array closing bracket";
+            } else if next_char != 44_u8 { // ','
+                error = "Expected comma in array";
                 success = false;
                 break;
             }
-            pos += 1;
+            pos += 1; // Skip the comma
             skip_whitespace(data, ref pos);
         };
         
-        if success {
-            Result::Ok(result)
-        } else {
+        if !success {
             Result::Err(error)
+        } else {
+            Result::Ok(result)
         }
     }
 
     pub fn parse_bool(data: @ByteArray, ref pos: usize) -> Result<bool, ByteArray> {
         skip_whitespace(data, ref pos);
-        if pos + 4 <= data.len() && data[pos] == 116_u8 && data[pos + 1] == 114_u8 && 
-           data[pos + 2] == 117_u8 && data[pos + 3] == 101_u8 { // "true"
+        if pos + 4 <= data.len() && 
+            data[pos] == 116_u8 && data[pos+1] == 114_u8 && data[pos+2] == 117_u8 && data[pos+3] == 101_u8 { // "true"
             pos += 4;
             Result::Ok(true)
-        } else if pos + 5 <= data.len() && data[pos] == 102_u8 && data[pos + 1] == 97_u8 && 
-                  data[pos + 2] == 108_u8 && data[pos + 3] == 115_u8 && data[pos + 4] == 101_u8 { // "false"
+        } else if pos + 5 <= data.len() && 
+            data[pos] == 102_u8 && data[pos+1] == 97_u8 && data[pos+2] == 108_u8 && 
+            data[pos+3] == 115_u8 && data[pos+4] == 101_u8 { // "false"
             pos += 5;
             Result::Ok(false)
         } else {

@@ -251,4 +251,101 @@ mod tests {
             },
         }
     }
+
+    #[test]
+    fn test_multiline_json() {
+        // Test with a multiline formatted JSON with significant whitespace and newlines
+        let json: ByteArray = "{\n  \"name\": \"alice\",\n  \"age\": 25,\n  \"verified\": true\n}";
+        let result = deserialize_from_byte_array::<User>(json);
+        match result {
+            Result::Ok(user) => {
+                assert(user.name == "alice", 'name should be alice');
+                assert(user.age == 25, 'age should be 25');
+                assert(user.verified, 'verified should be true');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Failed');
+            },
+        }
+    }
+
+    #[test]
+    fn test_deeply_nested_multiline_json() {
+        // Test with a deeply nested multiline JSON with various indentation levels
+        let json: ByteArray = "{\n  \"user\": {\n    \"name\": \"john\",\n    \"age\": 42,\n    \"verified\": false\n  },\n  \"message\": \"hello\",\n  \"comments\": [\n    \"nice\",\n    \"cool\"\n  ],\n  \"timestamp\": 1704748800\n}";
+        let result = deserialize_from_byte_array::<Post>(json);
+        match result {
+            Result::Ok(post) => {
+                assert(post.user.name == "john", 'user name should be john');
+                assert(post.user.age == 42, 'user age should be 42');
+                assert(!post.user.verified, 'verified should be false');
+                assert(post.message == "hello", 'message should be hello');
+                assert(post.comments.len() == 2, 'should have 2 comments');
+                assert(post.comments[0] == @"nice", 'first comment wrong');
+                assert(post.comments[1] == @"cool", 'second comment wrong');
+                assert(post.timestamp == 1704748800, 'timestamp should match');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Failed');
+            },
+        }
+    }
+
+    #[test]
+    fn test_mixed_whitespace_styles() {
+        // Test with a mix of tabs, spaces, and various whitespace characters
+        let json: ByteArray = "{\r\n\t\"name\":\t\"bob\",\r\n  \"age\":   30,\r\n\t\t\"verified\":  true\r\n}";
+        let result = deserialize_from_byte_array::<User>(json);
+        match result {
+            Result::Ok(user) => {
+                assert(user.name == "bob", 'name should be bob');
+                assert(user.age == 30, 'age should be 30');
+                assert(user.verified, 'verified should be true');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Failed');
+            },
+        }
+    }
+
+    #[test]
+    fn test_preserve_string_whitespace() {
+        // Test that whitespace within strings is preserved correctly
+        let json: ByteArray = "{\n  \"name\": \"john \t doe\",\n  \"age\": 25,\n  \"verified\": true\n}";
+        let result = deserialize_from_byte_array::<User>(json);
+        match result {
+            Result::Ok(user) => {
+                assert(user.name == "john \t doe", 'whitespace in string preserved');
+                assert(user.age == 25, 'age should be 25');
+                assert(user.verified, 'verified should be true');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Failed');
+            },
+        }
+    }
+
+    #[test]
+    fn test_multiline_complex_proof() {
+        // Test with a complex multiline JSON typical for proof objects
+        // Using only fields that exist in the Event struct (id, name, active)
+        let json: ByteArray = "{\n  \"id\": 123456,\n  \"name\": \"Proof Object\",\n  \"active\": true\n}";
+        
+        let result = deserialize_from_byte_array::<Event>(json);
+        match result {
+            Result::Ok(event) => {
+                assert(event.id == 123456, 'id should be 123456');
+                assert(event.name == "Proof Object", 'name should match');
+                assert(event.active, 'active should be true');
+            },
+            Result::Err(e) => {
+                println!("error: {}", e);
+                panic_with_felt252('Failed');
+            },
+        }
+    }
 }
