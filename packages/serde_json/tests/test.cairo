@@ -1,22 +1,20 @@
-use serde_json::json_parser;
-use serde_json::deserialize_from_byte_array;
+use core::array::Array;
 use core::byte_array::{ByteArray, ByteArrayTrait};
-use core::array::{Array};
-use serde_json::JsonDeserialize;
+use serde_json::{JsonDeserialize, deserialize_from_byte_array, json_parser};
 
 #[derive(Drop, Default, SerdeJson)]
 struct Event {
     id: felt252,
     name: ByteArray,
     active: bool,
-    timestamp: u256
+    timestamp: u256,
 }
 
 #[derive(Drop, Default, SerdeJson)]
 struct User {
     name: ByteArray,
     age: u64,
-    verified: bool
+    verified: bool,
 }
 
 #[derive(Drop, SerdeJson)]
@@ -30,14 +28,14 @@ struct Post {
 #[derive(Drop, SerdeJson, Default)]
 struct TestBigNumber {
     test_value: u128,
-    description: ByteArray
+    description: ByteArray,
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Post, User, Event, TestBigNumber, deserialize_from_byte_array};
     use core::byte_array::ByteArray;
     use core::panic_with_felt252;
+    use super::{Event, Post, TestBigNumber, User, deserialize_from_byte_array};
 
     #[test]
     fn test_correct_deserialization() {
@@ -110,7 +108,7 @@ mod tests {
 
     #[test]
     fn test_post_with_array() {
-        let json: ByteArray = 
+        let json: ByteArray =
             "{\"user\":{\"name\":\"john\",\"age\":42,\"verified\":false},\"message\":\"hello\",\"comments\":[\"nice\",\"cool\"],\"timestamp\":1704748800}";
         let result = deserialize_from_byte_array::<Post>(json);
         match result {
@@ -143,7 +141,7 @@ mod tests {
 
     #[test]
     fn test_invalid_array() {
-        let json: ByteArray = 
+        let json: ByteArray =
             "{\"user\":{\"name\":\"john\",\"age\":42,\"verified\":false},\"message\":\"hello\",\"comments\":\"not_an_array\",\"timestamp\":1704748800}";
         let result = deserialize_from_byte_array::<Post>(json);
         match result {
@@ -154,14 +152,19 @@ mod tests {
 
     #[test]
     fn test_event_with_felt252() {
-        let json: ByteArray = "{\"id\":123456,\"name\":\"launch\",\"active\":true,\"timestamp\":115792089237316195423570985008687907853269984665640564039457584007913129639935}";
+        let json: ByteArray =
+            "{\"id\":123456,\"name\":\"launch\",\"active\":true,\"timestamp\":115792089237316195423570985008687907853269984665640564039457584007913129639935}";
         let result = deserialize_from_byte_array::<Event>(json);
         match result {
             Result::Ok(event) => {
                 assert(event.id == 123456, 'id should be 123456');
                 assert(event.name == "launch", 'name should be launch');
                 assert(event.active, 'active should be true');
-                assert(event.timestamp == 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256, 'timestamp should be max u256');
+                assert(
+                    event
+                        .timestamp == 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256,
+                    'timestamp should be max u256',
+                );
             },
             Result::Err(e) => {
                 println!("error: {}", e);
@@ -208,14 +211,19 @@ mod tests {
         }
 
         // Test with quoted felt252 and u256
-        let json: ByteArray = "{\"id\":\"123456\",\"name\":\"launch\",\"active\":true,\"timestamp\":\"115792089237316195423570985008687907853269984665640564039457584007913129639935\"}";
+        let json: ByteArray =
+            "{\"id\":\"123456\",\"name\":\"launch\",\"active\":true,\"timestamp\":\"115792089237316195423570985008687907853269984665640564039457584007913129639935\"}";
         let result = deserialize_from_byte_array::<Event>(json);
         match result {
             Result::Ok(event) => {
                 assert(event.id == 123456, 'id should be 123456');
                 assert(event.name == "launch", 'name should be launch');
                 assert(event.active, 'active should be true');
-                assert(event.timestamp == 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256, 'timestamp should be max u256');
+                assert(
+                    event
+                        .timestamp == 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256,
+                    'timestamp should be max u256',
+                );
             },
             Result::Err(e) => {
                 println!("error: {}", e);
@@ -227,11 +235,15 @@ mod tests {
     #[test]
     fn test_u128_parsing() {
         // Test with unquoted u128
-        let json: ByteArray = "{\"test_value\":340282366920938463463374607431768211455,\"description\":\"max u128\"}";
+        let json: ByteArray =
+            "{\"test_value\":340282366920938463463374607431768211455,\"description\":\"max u128\"}";
         let result = deserialize_from_byte_array::<TestBigNumber>(json);
         match result {
             Result::Ok(big_num) => {
-                assert(big_num.test_value == 340282366920938463463374607431768211455_u128, 'value should be max u128');
+                assert(
+                    big_num.test_value == 340282366920938463463374607431768211455_u128,
+                    'value should be max u128',
+                );
                 assert(big_num.description == "max u128", 'description should match');
             },
             Result::Err(e) => {
@@ -239,7 +251,7 @@ mod tests {
                 panic_with_felt252('Deserialization failed');
             },
         }
-        
+
         // Test with quoted u128
         let json: ByteArray = "{\"test_value\":\"9223372036854775808\",\"description\":\"2^63\"}";
         let result = deserialize_from_byte_array::<TestBigNumber>(json);
