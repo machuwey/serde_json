@@ -45,6 +45,8 @@ pub fn serde_json(token_stream: TokenStream) -> ProcMacroResult {
             "parse_u64"
         } else if member_type == "u128" {
             "parse_u128"
+        } else if member_type == "u256" {
+            "parse_u256"
         } else if member_type == "ByteArray" {
             "parse_string"
         } else if member_type == "bool" {
