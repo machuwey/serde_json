@@ -26,6 +26,13 @@ impl U128JsonDeserialize of JsonDeserialize<u128> {
     }
 }
 
+// Implement JsonDeserialize for u256
+impl U256JsonDeserialize of JsonDeserialize<u256> {
+    fn deserialize(data: @ByteArray, ref pos: usize) -> Result<u256, ByteArray> {
+        json_parser::parse_u256(data, ref pos)
+    }
+}
+
 // Implement JsonDeserialize for ByteArray
 impl ByteArrayJsonDeserialize of JsonDeserialize<ByteArray> {
     fn deserialize(data: @ByteArray, ref pos: usize) -> Result<ByteArray, ByteArray> {

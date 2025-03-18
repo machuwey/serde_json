@@ -8,7 +8,8 @@ use serde_json::JsonDeserialize;
 struct Event {
     id: felt252,
     name: ByteArray,
-    active: bool
+    active: bool,
+    timestamp: u256
 }
 
 #[derive(Drop, Default, SerdeJson)]
@@ -153,13 +154,14 @@ mod tests {
 
     #[test]
     fn test_event_with_felt252() {
-        let json: ByteArray = "{\"id\":123456,\"name\":\"launch\",\"active\":true}";
+        let json: ByteArray = "{\"id\":123456,\"name\":\"launch\",\"active\":true,\"timestamp\":115792089237316195423570985008687907853269984665640564039457584007913129639935}";
         let result = deserialize_from_byte_array::<Event>(json);
         match result {
             Result::Ok(event) => {
                 assert(event.id == 123456, 'id should be 123456');
                 assert(event.name == "launch", 'name should be launch');
                 assert(event.active, 'active should be true');
+                assert(event.timestamp == 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256, 'timestamp should be max u256');
             },
             Result::Err(e) => {
                 println!("error: {}", e);
@@ -205,14 +207,15 @@ mod tests {
             },
         }
 
-        // Test with quoted felt252
-        let json: ByteArray = "{\"id\":\"123456\",\"name\":\"launch\",\"active\":true}";
+        // Test with quoted felt252 and u256
+        let json: ByteArray = "{\"id\":\"123456\",\"name\":\"launch\",\"active\":true,\"timestamp\":\"115792089237316195423570985008687907853269984665640564039457584007913129639935\"}";
         let result = deserialize_from_byte_array::<Event>(json);
         match result {
             Result::Ok(event) => {
                 assert(event.id == 123456, 'id should be 123456');
                 assert(event.name == "launch", 'name should be launch');
                 assert(event.active, 'active should be true');
+                assert(event.timestamp == 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256, 'timestamp should be max u256');
             },
             Result::Err(e) => {
                 println!("error: {}", e);
