@@ -1,10 +1,10 @@
+use core::array::{Array, ArrayTrait};
 use core::byte_array::{ByteArray, ByteArrayTrait};
-use core::result::{Result};
+use core::result::Result;
 use super::JsonDeserialize;
-use core::array::{ArrayTrait, Array};
 
 pub mod json_parser {
-    use super::{ByteArray, ByteArrayTrait, Result, ArrayTrait, Array};
+    use super::{Array, ArrayTrait, ByteArray, ByteArrayTrait, Result};
 
     pub fn skip_whitespace(data: @ByteArray, ref pos: usize) {
         let space = 32_u8;
@@ -59,7 +59,7 @@ pub mod json_parser {
                 result.append_byte(data[pos]);
                 pos += 1;
             }
-        };
+        }
 
         if !success {
             Result::Err(error)
@@ -74,21 +74,21 @@ pub mod json_parser {
 
     pub fn parse_felt252(data: @ByteArray, ref pos: usize) -> Result<felt252, ByteArray> {
         skip_whitespace(data, ref pos);
-        
+
         // Check if we have a quoted number
         let is_quoted = pos < data.len() && data[pos] == 34_u8; // '"'
         if is_quoted {
             pos += 1; // Skip the opening quote
         }
-        
+
         let mut num: felt252 = 0;
         let mut has_digits = false;
         while pos < data.len() && (data[pos] >= 48_u8 && data[pos] <= 57_u8) { // '0' to '9'
             num = num * 10 + (data[pos] - 48_u8).into();
             pos += 1;
             has_digits = true;
-        };
-        
+        }
+
         if is_quoted {
             // If it's quoted, we should end with a closing quote
             if pos >= data.len() || data[pos] != 34_u8 {
@@ -96,16 +96,16 @@ pub mod json_parser {
             }
             pos += 1; // Skip the closing quote
         }
-        
+
         if !has_digits {
             let error: ByteArray = "Expected number";
             return Result::Err(error);
-        };
+        }
         Result::Ok(num)
     }
 
     pub fn parse_object<T, impl TDeserialize: super::JsonDeserialize<T>, impl TDrop: Drop<T>>(
-        data: @ByteArray, ref pos: usize
+        data: @ByteArray, ref pos: usize,
     ) -> Result<T, ByteArray> {
         if pos >= data.len() || data[pos] != 123_u8 { // '{'
             return Result::Err("Expected object");
@@ -127,37 +127,35 @@ pub mod json_parser {
     }
 
     pub fn parse_array<T, impl TDeserialize: super::JsonDeserialize<T>, impl TDrop: Drop<T>>(
-        data: @ByteArray, ref pos: usize
+        data: @ByteArray, ref pos: usize,
     ) -> Result<Array<T>, ByteArray> {
         skip_whitespace(data, ref pos);
         if pos >= data.len() || data[pos] != 91_u8 { // '['
             return Result::Err("Expected array opening bracket");
         }
         pos += 1;
-        
+
         let mut result = array![];
         skip_whitespace(data, ref pos);
-        
+
         if pos < data.len() && data[pos] == 93_u8 { // ']'
             pos += 1;
             return Result::Ok(result);
         }
-        
+
         let mut success = true;
         let mut error: ByteArray = "";
-        
+
         loop {
             match TDeserialize::deserialize(data, ref pos) {
-                Result::Ok(value) => {
-                    result.append(value);
-                },
+                Result::Ok(value) => { result.append(value); },
                 Result::Err(err) => {
                     error = err;
                     success = false;
                     break;
-                }
-            };
-            
+                },
+            }
+
             skip_whitespace(data, ref pos);
             if pos >= data.len() {
                 error = "Unterminated array";
@@ -176,8 +174,8 @@ pub mod json_parser {
             }
             pos += 1;
             skip_whitespace(data, ref pos);
-        };
-        
+        }
+
         if success {
             Result::Ok(result)
         } else {
@@ -187,12 +185,21 @@ pub mod json_parser {
 
     pub fn parse_bool(data: @ByteArray, ref pos: usize) -> Result<bool, ByteArray> {
         skip_whitespace(data, ref pos);
-        if pos + 4 <= data.len() && data[pos] == 116_u8 && data[pos + 1] == 114_u8 && 
-           data[pos + 2] == 117_u8 && data[pos + 3] == 101_u8 { // "true"
+        if pos
+            + 4 <= data.len() && data[pos] == 116_u8 && data[pos
+            + 1] == 114_u8 && data[pos
+            + 2] == 117_u8 && data[pos
+            + 3] == 101_u8 {
+            // "true"
             pos += 4;
             Result::Ok(true)
-        } else if pos + 5 <= data.len() && data[pos] == 102_u8 && data[pos + 1] == 97_u8 && 
-                  data[pos + 2] == 108_u8 && data[pos + 3] == 115_u8 && data[pos + 4] == 101_u8 { // "false"
+        } else if pos
+            + 5 <= data.len() && data[pos] == 102_u8 && data[pos
+            + 1] == 97_u8 && data[pos
+            + 2] == 108_u8 && data[pos
+            + 3] == 115_u8 && data[pos
+            + 4] == 101_u8 {
+            // "false"
             pos += 5;
             Result::Ok(false)
         } else {
@@ -202,21 +209,21 @@ pub mod json_parser {
 
     pub fn parse_u128(data: @ByteArray, ref pos: usize) -> Result<u128, ByteArray> {
         skip_whitespace(data, ref pos);
-        
+
         // Check if we have a quoted number
         let is_quoted = pos < data.len() && data[pos] == 34_u8; // '"'
         if is_quoted {
             pos += 1; // Skip the opening quote
         }
-        
+
         let mut num: u128 = 0;
         let mut has_digits = false;
         while pos < data.len() && (data[pos] >= 48_u8 && data[pos] <= 57_u8) {
             num = num * 10 + (data[pos] - 48_u8).into();
             pos += 1;
             has_digits = true;
-        };
-        
+        }
+
         if is_quoted {
             // If it's quoted, we should end with a closing quote
             if pos >= data.len() || data[pos] != 34_u8 {
@@ -224,31 +231,31 @@ pub mod json_parser {
             }
             pos += 1; // Skip the closing quote
         }
-        
+
         if !has_digits {
             let error: ByteArray = "Expected number";
             return Result::Err(error);
-        };
+        }
         Result::Ok(num)
     }
 
     pub fn parse_u64(data: @ByteArray, ref pos: usize) -> Result<u64, ByteArray> {
         skip_whitespace(data, ref pos);
-        
+
         // Check if we have a quoted number
         let is_quoted = pos < data.len() && data[pos] == 34_u8; // '"'
         if is_quoted {
             pos += 1; // Skip the opening quote
         }
-        
+
         let mut num: u64 = 0;
         let mut has_digits = false;
         while pos < data.len() && (data[pos] >= 48_u8 && data[pos] <= 57_u8) {
             num = num * 10 + (data[pos] - 48_u8).into();
             pos += 1;
             has_digits = true;
-        };
-        
+        }
+
         if is_quoted {
             // If it's quoted, we should end with a closing quote
             if pos >= data.len() || data[pos] != 34_u8 {
@@ -256,31 +263,63 @@ pub mod json_parser {
             }
             pos += 1; // Skip the closing quote
         }
-        
+
         if !has_digits {
             let error: ByteArray = "Expected number";
             return Result::Err(error);
-        };
+        }
         Result::Ok(num)
     }
 
-    pub fn parse_u256(data: @ByteArray, ref pos: usize) -> Result<u256, ByteArray> {
+    pub fn parse_u32(data: @ByteArray, ref pos: usize) -> Result<u32, ByteArray> {
         skip_whitespace(data, ref pos);
-        
+
         // Check if we have a quoted number
         let is_quoted = pos < data.len() && data[pos] == 34_u8; // '"'
         if is_quoted {
             pos += 1; // Skip the opening quote
         }
-        
+
+        let mut num: u32 = 0;
+        let mut has_digits = false;
+        while pos < data.len() && (data[pos] >= 48_u8 && data[pos] <= 57_u8) {
+            num = num * 10 + (data[pos] - 48_u8).into();
+            pos += 1;
+            has_digits = true;
+        }
+
+        if is_quoted {
+            // If it's quoted, we should end with a closing quote
+            if pos >= data.len() || data[pos] != 34_u8 {
+                return Result::Err("Unterminated number string");
+            }
+            pos += 1; // Skip the closing quote
+        }
+
+        if !has_digits {
+            let error: ByteArray = "Expected number";
+            return Result::Err(error);
+        }
+        Result::Ok(num)
+    }
+
+    pub fn parse_u256(data: @ByteArray, ref pos: usize) -> Result<u256, ByteArray> {
+        skip_whitespace(data, ref pos);
+
+        // Check if we have a quoted number
+        let is_quoted = pos < data.len() && data[pos] == 34_u8; // '"'
+        if is_quoted {
+            pos += 1; // Skip the opening quote
+        }
+
         let mut num: u256 = 0;
         let mut has_digits = false;
         while pos < data.len() && (data[pos] >= 48_u8 && data[pos] <= 57_u8) {
             num = num * 10 + (data[pos] - 48_u8).into();
             pos += 1;
             has_digits = true;
-        };
-        
+        }
+
         if is_quoted {
             // If it's quoted, we should end with a closing quote
             if pos >= data.len() || data[pos] != 34_u8 {
@@ -288,11 +327,11 @@ pub mod json_parser {
             }
             pos += 1; // Skip the closing quote
         }
-        
+
         if !has_digits {
             let error: ByteArray = "Expected number";
             return Result::Err(error);
-        };
+        }
         Result::Ok(num)
     }
 }

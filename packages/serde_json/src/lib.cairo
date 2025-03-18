@@ -1,11 +1,11 @@
 pub mod parser;
 pub mod traits;
+use core::byte_array::ByteArray;
+use core::result::Result;
+use core::traits::Drop;
 
 pub use parser::json_parser;
 pub use traits::JsonDeserialize;
-use core::byte_array::ByteArray;
-use core::result::{Result};
-use core::traits::Drop;
 
 pub fn deserialize_from_byte_array<T, impl TDeserialize: JsonDeserialize<T>, impl TDrop: Drop<T>>(
     json_data: ByteArray,
