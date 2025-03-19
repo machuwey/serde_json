@@ -13,6 +13,13 @@ impl BoolJsonDeserialize of JsonDeserialize<bool> {
 }
 
 // Implement JsonDeserialize for u64
+impl U32JsonDeserialize of JsonDeserialize<u32> {
+    fn deserialize(data: @ByteArray, ref pos: usize) -> Result<u32, ByteArray> {
+        json_parser::parse_u32(data, ref pos)
+    }
+}
+
+// Implement JsonDeserialize for u64
 impl U64JsonDeserialize of JsonDeserialize<u64> {
     fn deserialize(data: @ByteArray, ref pos: usize) -> Result<u64, ByteArray> {
         json_parser::parse_u64(data, ref pos)
@@ -26,6 +33,13 @@ impl U128JsonDeserialize of JsonDeserialize<u128> {
     }
 }
 
+// Implement JsonDeserialize for u256
+impl U256JsonDeserialize of JsonDeserialize<u256> {
+    fn deserialize(data: @ByteArray, ref pos: usize) -> Result<u256, ByteArray> {
+        json_parser::parse_u256(data, ref pos)
+    }
+}
+
 // Implement JsonDeserialize for ByteArray
 impl ByteArrayJsonDeserialize of JsonDeserialize<ByteArray> {
     fn deserialize(data: @ByteArray, ref pos: usize) -> Result<ByteArray, ByteArray> {
@@ -33,7 +47,9 @@ impl ByteArrayJsonDeserialize of JsonDeserialize<ByteArray> {
     }
 }
 
-impl ArrayJsonDeserialize<T, impl TDeserialize: JsonDeserialize<T>, impl TDrop: Drop<T>> of JsonDeserialize<Array<T>> {
+impl ArrayJsonDeserialize<
+    T, impl TDeserialize: JsonDeserialize<T>, impl TDrop: Drop<T>,
+> of JsonDeserialize<Array<T>> {
     fn deserialize(data: @ByteArray, ref pos: usize) -> Result<Array<T>, ByteArray> {
         json_parser::parse_array::<T, TDeserialize, TDrop>(data, ref pos)
     }

@@ -1,11 +1,11 @@
 pub mod parser;
 pub mod traits;
+use core::byte_array::ByteArray;
+use core::result::Result;
+use core::traits::Drop;
 
 pub use parser::json_parser;
 pub use traits::JsonDeserialize;
-use core::byte_array::{ByteArray, ByteArrayTrait};
-use core::result::{Result};
-use core::traits::Drop;
 
 /// Preprocesses JSON input to handle multiline formatting 
 /// by normalizing whitespace outside of quoted strings.
