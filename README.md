@@ -17,8 +17,10 @@ To use Serde JSON in your Cairo project, add the following dependencies to your 
 
 ```toml
 [dependencies]
-serde_json = { git = "https://github.com/StrapexLabs/serde_json", tag = "v0.1.0" }
-serde_json_macro = { git = "https://github.com/StrapexLabs/serde_json", tag = "v0.1.0" }
+
+serde_json = { git = "https://github.com/StrapexLabs/serde_json", tag = "v0.1.1" }
+serde_json_macro = { git = "https://github.com/StrapexLabs/serde_json", tag = "v0.1.1" }
+
 ```
 
 Replace `v0.1.0` with the appropriate tag or branch for the version you wish to use.
