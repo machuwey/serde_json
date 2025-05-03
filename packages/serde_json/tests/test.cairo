@@ -348,7 +348,7 @@ mod tests {
     fn test_multiline_complex_proof() {
         // Test with a complex multiline JSON typical for proof objects
         // Using only fields that exist in the Event struct (id, name, active)
-        let json: ByteArray = "{\n  \"id\": 123456,\n  \"name\": \"Proof Object\",\n  \"active\": true\n}";
+        let json: ByteArray = "{\n  \"id\": 123456,\n  \"name\": \"Proof Object\",\n  \"active\": true,\n  \"timestamp\": 0\n}";
         
         let result = deserialize_from_byte_array::<Event>(json);
         match result {

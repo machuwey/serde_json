@@ -186,6 +186,8 @@ pub mod json_parser {
 
         if success {
             Result::Ok(result)
+        } else {
+            Result::Err(error)
         }
     }
 
