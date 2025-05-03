@@ -1,5 +1,12 @@
 [package]
 name = "serde_json_macro"
 version = "0.1.0"
+edition = "2024_07"
 
 [cairo-plugin]
+
+[tool]
+fmt.workspace = true
+
+[dev-dependencies]
+cairo_test.workspace = true

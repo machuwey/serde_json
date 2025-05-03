@@ -2,7 +2,6 @@
 name = "serde_json_macro"
 version = "0.1.0"
 edition = "2021"
-publish = false
 
 [lib]
 crate-type = ["cdylib"]
@@ -12,5 +11,3 @@ cairo-lang-macro = "0.1.1"
 cairo-lang-parser = "2.10.1"
 cairo-lang-syntax = "2.10.1"
 indoc = "2"
-
-[workspace]
